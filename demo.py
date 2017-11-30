@@ -132,7 +132,8 @@ def server_restore(server):
     else :
         print "ignore"
 
-def support_restore(a,b):
+def support_restore(a,b,edge):
+    #a,bはその階層の範囲　edgeは、edgeserverの次のノードかどうか
     #support server [13,["R",143]] when restore from server
     for support in range(a,b):
         children = G.pred[support].keys()
@@ -142,6 +143,10 @@ def support_restore(a,b):
            #X = <support diffrence + server sum data /2>
            X = (support_data[1][1] + support_data[0])/2
            Y = (support_data[1][1] - support_data[0])/2
+           print "[LOG] support data X = " + str(X) + " Y = " + str(Y)
+           if edge:
+                print "GET!! two Edge Node Value X = " + str(X) + " Y = " + str(Y)
+                break
            if X > Y:
                print "send sum! X"
                G.nodes(data=True)[children[0]][1]['data'].append(["R",X])
@@ -163,10 +168,10 @@ def restore_data_process():
             server_restore(G.nodes()[-1])
             display()
         if clock == 3:
-            support_restore(12,14)
+            support_restore(12,14,edge=False)
             display()
         if clock == 4:
-            support_restore(8,11)
+            support_restore(8,11,edge=True)
             display()
 
 sending_data_process()
