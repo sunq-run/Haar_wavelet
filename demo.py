@@ -4,59 +4,6 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import sys,random
 
-args = sys.argv
-
-G = nx.DiGraph()
-# make grahp
-print args
-if len(args) == 1:
-    G.add_node(0, data=23)
-    G.add_node(1, data=8)
-    G.add_node(2, data=2)
-    G.add_node(3, data=10)
-    G.add_node(4, data=11)
-    G.add_node(5, data=67)
-    G.add_node(6, data=22)
-    G.add_node(7, data=43)
-elif args[1] == "-r":
-    G.add_node(0, data=random.randint(1,100))
-    G.add_node(1, data=random.randint(1,100))
-    G.add_node(2, data=random.randint(1,100))
-    G.add_node(3, data=random.randint(1,100))
-    G.add_node(4, data=random.randint(1,100))
-    G.add_node(5, data=random.randint(1,100))
-    G.add_node(6, data=random.randint(1,100))
-    G.add_node(7, data=random.randint(1,100))
-else:
-    print "invalid Options"
-
-G.add_node(8, data=[])
-G.add_node(9, data=[])
-G.add_node(10, data=[])
-G.add_node(11, data=[])
-G.add_node(12, data=[])
-G.add_node(13, data=[])
-G.add_node(14, data=[])
-
-G.add_edges_from([(0, 8),
-                  (1, 8),
-                  (2, 9),
-                  (3, 9),
-                  (4, 10),
-                  (5, 10),
-                  (6, 11),
-                  (7, 11),
-                  (8, 12),
-                  (9, 12),
-                  (10, 13),
-                  (11, 13),
-                  (12, 14),
-                  (13, 14)
-                  ]
-                )
-
-#set value edge server
-#for i in len(G.nodes()):
     
 #matplot posision
 pos = { 0 : (0, 80),
@@ -101,7 +48,7 @@ def display():
     plt.text(20,20,getdata(13),fontsize=12)
     plt.text(30,45,getdata(14),fontsize=12)
     #How display time per one frame?
-    plt.pause(4)
+    plt.pause(0.1)
 
 def support_server(a,b):
     for support in range(a,b):
@@ -194,6 +141,42 @@ def restore_data_process():
             support_restore(8,12,edge=True)
             display()
 
-sending_data_process()
-restore_data_process()
+while True:
+
+    G = nx.DiGraph()
+    G.add_node(0, data=random.randint(1,100))
+    G.add_node(1, data=random.randint(1,100))
+    G.add_node(2, data=random.randint(1,100))
+    G.add_node(3, data=random.randint(1,100))
+    G.add_node(4, data=random.randint(1,100))
+    G.add_node(5, data=random.randint(1,100))
+    G.add_node(6, data=random.randint(1,100))
+    G.add_node(7, data=random.randint(1,100))
+    G.add_node(8, data=[])
+    G.add_node(9, data=[])
+    G.add_node(10, data=[])
+    G.add_node(11, data=[])
+    G.add_node(12, data=[])
+    G.add_node(13, data=[])
+    G.add_node(14, data=[])
+    
+    G.add_edges_from([(0, 8),
+                  (1, 8),
+                  (2, 9),
+                  (3, 9),
+                  (4, 10),
+                  (5, 10),
+                  (6, 11),
+                  (7, 11),
+                  (8, 12),
+                  (9, 12),
+                  (10, 13),
+                  (11, 13),
+                  (12, 14),
+                  (13, 14)
+                  ]
+                )
+
+    sending_data_process()
+    restore_data_process()
 
