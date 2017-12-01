@@ -2,17 +2,34 @@
 # -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 import networkx as nx
+import sys,random
+
+args = sys.argv
 
 G = nx.DiGraph()
 # make grahp
-G.add_node(0, data=23)
-G.add_node(1, data=8)
-G.add_node(2, data=2)
-G.add_node(3, data=10)
-G.add_node(4, data=11)
-G.add_node(5, data=67)
-G.add_node(6, data=22)
-G.add_node(7, data=43)
+print args
+if len(args) == 1:
+    G.add_node(0, data=23)
+    G.add_node(1, data=8)
+    G.add_node(2, data=2)
+    G.add_node(3, data=10)
+    G.add_node(4, data=11)
+    G.add_node(5, data=67)
+    G.add_node(6, data=22)
+    G.add_node(7, data=43)
+elif args[1] == "-r":
+    G.add_node(0, data=random.randint(1,100))
+    G.add_node(1, data=random.randint(1,100))
+    G.add_node(2, data=random.randint(1,100))
+    G.add_node(3, data=random.randint(1,100))
+    G.add_node(4, data=random.randint(1,100))
+    G.add_node(5, data=random.randint(1,100))
+    G.add_node(6, data=random.randint(1,100))
+    G.add_node(7, data=random.randint(1,100))
+else:
+    print "invalid Options"
+
 G.add_node(8, data=[])
 G.add_node(9, data=[])
 G.add_node(10, data=[])
@@ -137,11 +154,14 @@ def support_restore(a,b,edge):
     #support server [13,["R",143]] when restore from server
     for support in range(a,b):
         children = G.pred[support].keys()
+        print "[LOG]children is " + str(children)
         support_data = G.nodes(data=True)[support][1]['data']
         print support_data
         if len(support_data) == 2 and support_data[1][0] == "R":
            #X = <support diffrence + server sum data /2>
+           print "[LOG] (X + Y)/2 ::::" + "(" + str(support_data[1][1]) + "+" + str(support_data[0]) + ")/2"
            X = (support_data[1][1] + support_data[0])/2
+           print "[LOG] (X + Y)/2 ::::" + "(" + str(support_data[1][1]) + "-" + str(support_data[0]) + ")/2"
            Y = (support_data[1][1] - support_data[0])/2
            print "[LOG] support data X = " + str(X) + " Y = " + str(Y)
            if edge:
@@ -152,7 +172,7 @@ def support_restore(a,b,edge):
                G.nodes(data=True)[children[0]][1]['data'].append(["R",X])
            elif X < Y:
                print "send sum! Y"
-               G.nodes(data=True)[children[0]][1]['data'].append(["R",Y])
+               G.nodes(data=True)[children[1]][1]['data'].append(["R",Y])
            else:
                print "ignore"
         else:
@@ -171,7 +191,7 @@ def restore_data_process():
             support_restore(12,14,edge=False)
             display()
         if clock == 4:
-            support_restore(8,11,edge=True)
+            support_restore(8,12,edge=True)
             display()
 
 sending_data_process()
