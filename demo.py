@@ -146,6 +146,7 @@ def server_restore(server):
         G.nodes(data=True)[children[0]][1]['data'].append(["R",server_data[0]])
     elif server_data[0] < server_data[1]:
         print "send sum! children[1]"
+        G.nodes(data=True)[children[1]][1]['data'][0] = G.nodes(data=True)[children[1]][1]['data'][0] + 20
         G.nodes(data=True)[children[1]][1]['data'].append(["R",server_data[1]])
     else :
         print "ignore"
