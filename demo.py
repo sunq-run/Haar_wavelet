@@ -14,7 +14,7 @@ if len(args) == 1:
     G.add_node(1, data=8)
     G.add_node(2, data=2)
     G.add_node(3, data=10)
-    G.add_node(4, data=11)
+    G.add_node(4, data=0)
     G.add_node(5, data=67)
     G.add_node(6, data=22)
     G.add_node(7, data=43)
@@ -159,10 +159,10 @@ def support_restore(a,b,edge):
         print support_data
         if len(support_data) == 2 and support_data[1][0] == "R":
            #X = <support diffrence + server sum data /2>
-           print "[LOG] (X + Y)/2 ::::" + "(" + str(support_data[1][1]) + "+" + str(support_data[0]) + ")/2"
-           X = (support_data[1][1] + support_data[0])/2
-           print "[LOG] (X + Y)/2 ::::" + "(" + str(support_data[1][1]) + "-" + str(support_data[0]) + ")/2"
-           Y = (support_data[1][1] - support_data[0])/2
+           print "[LOG] (X + Y)/2 ::::" + "(" + str(support_data[1][1]) + "+" + str(support_data[0]) + " )/2"
+           X = (support_data[1][1] + (support_data[0]))/2
+           print "[LOG] (X + Y)/2 ::::" + "(" + str(support_data[1][1]) + "-" + str(support_data[0]) + " )/2"
+           Y = (support_data[1][1] - (support_data[0]))/2
            print "[LOG] support data X = " + str(X) + " Y = " + str(Y)
            if edge:
                 print "GET!! two Edge Node Value X = " + str(X) + " Y = " + str(Y)
