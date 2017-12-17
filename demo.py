@@ -81,7 +81,7 @@ def getdata(name):
 
 def display():
     #reset graph
-    plt.figure()
+    plt.figure().subplots_adjust(right=0.7)
     #draw graph
     nx.draw_networkx(G, pos=pos)
     #draw text
@@ -160,7 +160,8 @@ def support_server(a,b):
         else:
                 G.nodes(data=True)[support][1]['data'][0] = {}
         #フラグに関しての処理ここまで
-
+        #save
+        G.nodes(data=True)[support][1]['data'][0]["diff"] = save_data
         #send
         next_support_server[support] = send_data
         
@@ -198,15 +199,27 @@ def sending_data_process():
 
 def server_restore(server):
     #サーバーからサポートサーバーに詳細なデータを要求する処理
-    server_data = G.nodes(data=True)[server][1]['data']
-    children = G.pred[server].keys()
-    if server_data[0] > server_data[1]:
-        print "send sum! children[0]"
-        G.nodes(data=True)[children[0]][1]['data'].append(["R",server_data[0]])
-    elif server_data[0] < server_data[1]:
-        print "send sum! children[1]"
-        G.nodes(data=True)[children[1]][1]['data'].append(["R",server_data[1]])
-    else :
+    server_data = G.nodes(data=True)[server][1]['data'][0]
+    child_node_table = G.nodes(data=True)[server][1]['data'][1]
+    children = child_node_table.keys()
+    correct = 0
+    if "incident" in server_data.keys():
+        print "incident respons!!!"
+        correct = 20
+        incident_node = server_data["incident"].split(":")[0]
+        incident_child = server_data["incident"].split(":")[1]
+        server_data[int(incident_child)] = server_data[int(incident_child)] + correct
+    if server_data[children[0]] < server_data[children[1]]:
+        child_data = G.nodes(data=True)[children[1]][1]['data'][0]
+        child_data["restore"] = server_data[children[1]] 
+        child_data["correct"] = correct
+        print server_data[children[1]]
+    elif server_data[children[0]] > server_data[children[1]]:
+        child_data = G.nodes(data=True)[children[0]][1]['data'][0]
+        child_data["restore"] = server_data[children[0]] 
+        child_data["correct"] = correct
+        print server_data[children[0]]
+    else:
         print "ignore"
 
 def support_restore(a,b,edge):
@@ -214,30 +227,58 @@ def support_restore(a,b,edge):
     #a,bはその階層の範囲　edgeは、edgeserverの次のノードかどうか
     #support server [13,["R",143]] when restore from server
     for support in range(a,b):
-        children = G.pred[support].keys()
+        support_data = G.nodes(data=True)[support][1]['data'][0]
+        child_node_table = G.nodes(data=True)[support][1]['data'][1]
+        children = child_node_table.keys()
+        R_node = child_node_table.keys()[child_node_table.values().index("R")]
+        L_node = child_node_table.keys()[child_node_table.values().index("L")]
         print "[LOG]children is " + str(children)
-        support_data = G.nodes(data=True)[support][1]['data']
-        print support_data
-        if len(support_data) == 2 and support_data[1][0] == "R":
-           #X = <support diffrence + server sum data /2>
-           print "[LOG] (X + Y)/2 ::::" + "(" + str(support_data[1][1]) + "+" + str(support_data[0]) + " )/2"
-           X = (support_data[1][1] + (support_data[0]))/2
-           print "[LOG] (X + Y)/2 ::::" + "(" + str(support_data[1][1]) + "-" + str(support_data[0]) + " )/2"
-           Y = (support_data[1][1] - (support_data[0]))/2
-           print "[LOG] support data X = " + str(X) + " Y = " + str(Y)
-           if edge:
-                print "GET!! two Edge Node Value X = " + str(X) + " Y = " + str(Y)
+        if "Flag" in support_data.keys():
+            if support_data["Flag"] == "R":
+                R = (support_data["restore"] + (support_data["diff"] + support_data["correct"]))/2
+                L = (support_data["restore"] - (support_data["diff"] + support_data["correct"]))/2
+                print '(' + str(support_data["restore"]) + ' - (' + str(support_data["diff"]) + "+" + str(support_data["correct"]) + '))/2'
+            if support_data["Flag"] == "L":
+                R = (support_data["restore"] + (support_data["diff"] - support_data["correct"]))/2
+                L = (support_data["restore"] - (support_data["diff"] - support_data["correct"]))/2
+                print '(' + str(support_data["restore"]) + ' - (' + str(support_data["diff"]) + "-" + str(support_data["correct"]) + '))/2'
+
+            print "[LOG] support data X = " + str(R) + " Y = " + str(L)
+            if edge:
+                print "GET!! two Edge Node Value X = " + str(R) + " Y = " + str(L)
                 break
-           if X > Y:
-               print "send sum! X"
-               G.nodes(data=True)[children[0]][1]['data'].append(["R",X])
-           elif X < Y:
-               print "send sum! Y"
-               G.nodes(data=True)[children[1]][1]['data'].append(["R",Y])
-           else:
-               print "ignore"
+            if R > L:
+                print "send sum! X with correct data"
+                child_data = G.nodes(data=True)[R_node][1]['data'][0]
+                child_data["restore"] = R
+                child_data["correct"] = support_data["correct"]
+            elif R < L:
+                print "send sum! Y with correct data"
+                child_data = G.nodes(data=True)[L_node][1]['data'][0]
+                child_data["restore"] = L
+                child_data["correct"] = support_data["correct"]
+            else:
+                print "ignore"
+
+        elif "restore" in support_data.keys():
+             R = (support_data["restore"] + support_data["diff"])/2
+             L = (support_data["restore"] - support_data["diff"])/2
+             print "[LOG] support data X = " + str(R) + " Y = " + str(L)
+             if edge:
+                 print "GET!! two Edge Node Value X = " + str(R) + " Y = " + str(L)
+                 break
+             if R > L:
+                 print "send sum! X"
+                 child_data = G.nodes(data=True)[R_node][1]['data'][0]
+                 child_data["restore"] = R
+             elif R < L:
+                 print "send sum! Y"
+                 child_data = G.nodes(data=True)[L_node][1]['data'][0]
+                 child_data["restore"] = L
+             else:
+                 print "ignore"
         else:
-            print "Nothing Recive data from server"
+            "not restore node"
             
             
 def restore_data_process():
@@ -256,7 +297,7 @@ def restore_data_process():
             display()
 
 def sending_data_process_error():
-    print "[LOG] Start Processing of restore with correct data."
+    print "[LOG] Start Processing of sending with correct data."
     for clock in range(6):
         #command = raw_input()
         #if command == "n":
@@ -264,8 +305,9 @@ def sending_data_process_error():
         if clock == 1:
             display()
         if clock == 2:
-            #sending_edge(5)
+            #引数-1で異常なし状態
             sending_edge(7)
+            #sending_edge(-1)
             display() 
         if clock == 3:
             support_server(8,12)
@@ -274,9 +316,21 @@ def sending_data_process_error():
             support_server(12,14)
             display()
 
+def restore_data_process_error():
+    print "[LOG] Start Processing of restore with correct data."
+    for clock in range(6):
+        if clock == 1:
+            server_restore(G.nodes()[-1])
+            display()
+        if clock == 2:
+            support_restore(12,14,edge=False)
+            display()
+        if clock == 3:  
+            support_restore(8,12,edge=True)
+            display()
 
 #sending_data_process()
 #restore_data_process()
 
 sending_data_process_error()
-
+restore_data_process_error()
