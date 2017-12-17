@@ -110,11 +110,14 @@ def support_server(a,b):
         child_node_table = G.nodes(data=True)[support][1]['data'][1]
         R_name = child_node_table.keys()[child_node_table.values().index("R")]
         L_name = child_node_table.keys()[child_node_table.values().index("L")]
+        parentis = G.succ[support].keys()[0]
+        next_support_server = G.nodes(data=True)[parentis][1]['data'][0]
         #仮補整データ0の埋め込み
         #ノード番号から
         flags = []
         for node_name in support_server_data.keys():
-            flags.append(child_node_table[node_name])
+            if type(node_name) == type(123):
+                flags.append(child_node_table[node_name])
 
         if "R" not in flags:
             print child_node_table.keys()[child_node_table.values().index("R")]
@@ -133,19 +136,32 @@ def support_server(a,b):
         save_data = int(X) - int(Y)
         #save
         print G.nodes(data=True)[support][1]['data'][0]
+        #フラグに関しての処理
+        if "incident" in support_server_data.keys():
+                incident = support_server_data["incident"]
+                incident_node = incident.split(":")[0]
+                child_incident = incident.split(":")[1]
+                #send
+                next_support_server["incident"] = str(incident_node) + ":" + str(support)
+                #save
+                G.nodes(data=True)[support][1]['data'][0]["Flag"] = str(incident_node) + str(child_node_table[int(child_incident)])
+
         if "Flag" in support_server_data.keys():
                 print "Flag!!!!!!!!!!"
                 save = support_server_data["Flag"][-1]
                 sendRL = support_server_data["Flag"][:-1]
                 print save
                 print sendRL
+                #save
                 G.nodes(data=True)[support][1]['data'][0] = {}
                 G.nodes(data=True)[support][1]['data'][0]["Flag"] = save
+                #send
+                next_support_server["incident"] = str(sendRL) + ":" + str(support)
         else:
                 G.nodes(data=True)[support][1]['data'][0] = {}
+        #フラグに関しての処理ここまで
+
         #send
-        parentis = G.succ[support].keys()[0]
-        next_support_server = G.nodes(data=True)[parentis][1]['data'][0]
         next_support_server[support] = send_data
         
 
@@ -248,7 +264,8 @@ def sending_data_process_error():
         if clock == 1:
             display()
         if clock == 2:
-            sending_edge(5)
+            #sending_edge(5)
+            sending_edge(7)
             display() 
         if clock == 3:
             support_server(8,12)
