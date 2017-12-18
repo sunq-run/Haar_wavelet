@@ -19,14 +19,14 @@ if len(args) == 1:
     G.add_node(6, data=[22])
     G.add_node(7, data=[8])
 elif args[1] == "-r":
-    G.add_node(0, data=random.randint(1,100))
-    G.add_node(1, data=random.randint(1,100))
-    G.add_node(2, data=random.randint(1,100))
-    G.add_node(3, data=random.randint(1,100))
-    G.add_node(4, data=random.randint(1,100))
-    G.add_node(5, data=random.randint(1,100))
-    G.add_node(6, data=random.randint(1,100))
-    G.add_node(7, data=random.randint(1,100))
+    G.add_node(0, data=[random.randint(1,100)])
+    G.add_node(1, data=[random.randint(1,100)])
+    G.add_node(2, data=[random.randint(1,100)])
+    G.add_node(3, data=[random.randint(1,100)])
+    G.add_node(4, data=[random.randint(1,100)])
+    G.add_node(5, data=[random.randint(1,100)])
+    G.add_node(6, data=[random.randint(1,100)])
+    G.add_node(7, data=[random.randint(1,100)])
 else:
     print "invalid Options"
 
@@ -233,7 +233,8 @@ def support_restore(a,b,edge):
         R_node = child_node_table.keys()[child_node_table.values().index("R")]
         L_node = child_node_table.keys()[child_node_table.values().index("L")]
         print "[LOG]children is " + str(children)
-        if "Flag" in support_data.keys():
+        if "Flag" in support_data.keys() and "restore" in support_data.keys():
+            print support_data
             if support_data["Flag"] == "R":
                 R = (support_data["restore"] + (support_data["diff"] + support_data["correct"]))/2
                 L = (support_data["restore"] - (support_data["diff"] + support_data["correct"]))/2
@@ -306,7 +307,7 @@ def sending_data_process_error():
             display()
         if clock == 2:
             #引数-1で異常なし状態
-            sending_edge(7)
+            sending_edge(5)
             #sending_edge(-1)
             display() 
         if clock == 3:
