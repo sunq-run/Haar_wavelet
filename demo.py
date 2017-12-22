@@ -4,6 +4,22 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import sys,random
 import time
+
+class takeyuki:
+    BLACK = '\033[30m'
+    RED = '\033[31m'
+    GREEN = '\033[32m'
+    YELLOW = '\033[33m'
+    BLUE = '\033[34m'
+    PURPLE = '\033[35m'
+    CYAN = '\033[36m'
+    WHITE = '\033[37m'
+    END = '\033[0m'
+    BOLD = '\038[1m'
+    UNDERLINE = '\033[4m'
+    INVISIBLE = '\033[08m'
+    REVERCE = '\033[07m'
+
 args = sys.argv
 
 G = nx.DiGraph()
@@ -109,6 +125,8 @@ def display():
 def support_server(a,b):
     #サポートサーバーが上に送信するときの処理
     for support in range(a,b):
+        send_packet = {}
+        save_pack = {}
         support_server_data = G.nodes(data=True)[support][1]['data'][0]
         child_node_table = G.nodes(data=True)[support][1]['data'][1]
         R_name = child_node_table.keys()[child_node_table.values().index("R")]
@@ -134,9 +152,9 @@ def support_server(a,b):
 
         X = support_server_data[R_name]
         Y = support_server_data[L_name]
-        print "[LOG] Sending data at server" + str(support) + " " + str(X) + "+" + str(Y)
         send_data = int(X) + int(Y)
         save_data = int(X) - int(Y)
+        send_packet[support] = send_data
         #save
         print G.nodes(data=True)[support][1]['data'][0]
         #フラグに関しての処理
@@ -145,9 +163,10 @@ def support_server(a,b):
                 incident_node = incident.split(":")[0]
                 child_incident = incident.split(":")[1]
                 #send
-                next_support_server["incident"] = str(incident_node) + ":" + str(support)
+                send_packet["incident"] = str(incident_node) + ":" + str(support)
                 #save
-                G.nodes(data=True)[support][1]['data'][0]["Flag"] = str(incident_node) + str(child_node_table[int(child_incident)])
+                #save_pack["Flag"] = str(incident_node) + str(child_node_table[int(child_incident)])
+                save_pack["Flag"] = str(child_node_table[int(child_incident)])
 
         if "Flag" in support_server_data.keys():
                 print "Flag!!!!!!!!!!"
@@ -157,16 +176,19 @@ def support_server(a,b):
                 print sendRL
                 #save
                 G.nodes(data=True)[support][1]['data'][0] = {}
-                G.nodes(data=True)[support][1]['data'][0]["Flag"] = save
+                save_pack["Flag"] = save
                 #send
-                next_support_server["incident"] = str(sendRL) + ":" + str(support)
+                send_packet["incident"] = str(sendRL) + ":" + str(support)
         else:
                 G.nodes(data=True)[support][1]['data'][0] = {}
         #フラグに関しての処理ここまで
         #save
-        G.nodes(data=True)[support][1]['data'][0]["diff"] = save_data
+        save_pack["diff"] = save_data
+        print takeyuki.GREEN + "S(" + str(support) + ")" + takeyuki.END + " " +  takeyuki.BLUE +  str(save_pack) + takeyuki.END
+        G.nodes(data=True)[support][1]['data'][0].update(save_pack)
         #send
-        next_support_server[support] = send_data
+        print takeyuki.GREEN + "S(" + str(support) + ")==>" + "S(" + str(parentis) + ")" + takeyuki.END + " " +  takeyuki.RED +  str(send_packet) + takeyuki.END
+        next_support_server.update(send_packet)
         
 
 def sending_edge(err):
@@ -174,6 +196,7 @@ def sending_edge(err):
         for i in range(8):
             parentis = G.succ[i].keys()[0]
             support_server_data = G.nodes(data=True)[parentis][1]['data']
+            print takeyuki.GREEN + "E(" + str(i) + ")==>" + "S(" + str(parentis) + ")" + takeyuki.END + " " +  takeyuki.RED +  str(getdata(i)[0]) + takeyuki.END
             support_server_data[0][i]  = getdata(i)[0]
     else:
         for i in range(8):
@@ -182,6 +205,7 @@ def sending_edge(err):
             else:
                 parentis = G.succ[i].keys()[0]
                 support_server_data = G.nodes(data=True)[parentis][1]['data']
+                print takeyuki.GREEN + "E(" + str(i) + ")==>" + "S(" + str(parentis) + ")" + takeyuki.END + " " +  takeyuki.RED +  str(getdata(i)[0]) + takeyuki.END
                 support_server_data[0][i] = getdata(i)[0]
         
 def sending_data_process():
@@ -206,6 +230,7 @@ def server_restore(server):
     child_node_table = G.nodes(data=True)[server][1]['data'][1]
     children = child_node_table.keys()
     correct = 0
+    send_packet = {}
     if "incident" in server_data.keys():
         print "incident respons!!!"
         correct = 20
@@ -214,13 +239,17 @@ def server_restore(server):
         server_data[int(incident_child)] = server_data[int(incident_child)] + correct
     if server_data[children[0]] < server_data[children[1]]:
         child_data = G.nodes(data=True)[children[1]][1]['data'][0]
-        child_data["restore"] = server_data[children[1]] 
-        child_data["correct"] = correct
+        send_packet["restore"] = server_data[children[1]] 
+        send_packet["correct"] = correct
+        child_data.update(send_packet)
+        print "Send packet to child " + str(send_packet)
         print server_data[children[1]]
     elif server_data[children[0]] > server_data[children[1]]:
         child_data = G.nodes(data=True)[children[0]][1]['data'][0]
-        child_data["restore"] = server_data[children[0]] 
-        child_data["correct"] = correct
+        send_packet["restore"] = server_data[children[0]] 
+        send_packet["correct"] = correct
+        print "Send packet to child " + str(send_packet)
+        child_data.update(send_packet)
         print server_data[children[0]]
     else:
         print "ignore"
@@ -230,6 +259,7 @@ def support_restore(a,b,edge):
     #a,bはその階層の範囲　edgeは、edgeserverの次のノードかどうか
     #support server [13,["R",143]] when restore from server
     for support in range(a,b):
+        send_data = {}
         support_data = G.nodes(data=True)[support][1]['data'][0]
         child_node_table = G.nodes(data=True)[support][1]['data'][1]
         children = child_node_table.keys()
