@@ -79,27 +79,30 @@ pos = { 0 : (0, 80),
 def getdata(name):
     return G.nodes(data=True)[name][1]['data']
 
+def data_display(name):
+    return G.nodes(data=True)[name][1]['data'][0]
+
 def display():
     #reset graph
     plt.figure().subplots_adjust(right=0.7)
     #draw graph
     nx.draw_networkx(G, pos=pos)
     #draw text
-    plt.text(-4,80,getdata(0),fontsize=12)
-    plt.text(-4,70,getdata(1),fontsize=12)
-    plt.text(-4,60,getdata(2),fontsize=12)
-    plt.text(-4,50,getdata(3),fontsize=12)
-    plt.text(-4,40,getdata(4),fontsize=12)
-    plt.text(-4,30,getdata(5),fontsize=12)
-    plt.text(-4,20,getdata(6),fontsize=12)
-    plt.text(-4,10,getdata(7),fontsize=12)
-    plt.text(10,70,getdata(8),fontsize=12)
-    plt.text(10,50,getdata(9),fontsize=12)
-    plt.text(10,30,getdata(10),fontsize=12)
-    plt.text(10,10,getdata(11),fontsize=12)
-    plt.text(20,60,getdata(12),fontsize=12)
-    plt.text(20,20,getdata(13),fontsize=12)
-    plt.text(30,45,getdata(14),fontsize=12)
+    plt.text(-4,80,data_display(0),fontsize=12)
+    plt.text(-4,70,data_display(1),fontsize=12)
+    plt.text(-4,60,data_display(2),fontsize=12)
+    plt.text(-4,50,data_display(3),fontsize=12)
+    plt.text(-4,40,data_display(4),fontsize=12)
+    plt.text(-4,30,data_display(5),fontsize=12)
+    plt.text(-4,20,data_display(6),fontsize=12)
+    plt.text(-4,10,data_display(7),fontsize=12)
+    plt.text(10,70,data_display(8),fontsize=12)
+    plt.text(10,50,data_display(9),fontsize=12)
+    plt.text(10,30,data_display(10),fontsize=12)
+    plt.text(10,10,data_display(11),fontsize=12)
+    plt.text(20,60,data_display(12),fontsize=12)
+    plt.text(20,20,data_display(13),fontsize=12)
+    plt.text(30,45,data_display(14),fontsize=12)
     #How display time per one frame?
     plt.pause(4)
 
@@ -320,6 +323,9 @@ def sending_data_process_error():
 def restore_data_process_error():
     print "[LOG] Start Processing of restore with correct data."
     for clock in range(6):
+        #command = raw_input()
+        #if command == "n":
+        #    print "GO"
         if clock == 1:
             server_restore(G.nodes()[-1])
             display()
